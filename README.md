@@ -102,3 +102,36 @@ makima_bot/
 - Rate limits: Groq free tier has limits – upgrade if needed.
 
 Made with ❤️ for elegant group control.
+
+## Deployment (Docker / Railway / Render / VPS)
+
+### Required Environment Variables
+```
+BOT_TOKEN=
+GROQ_API_KEY=
+MONGO_URI=mongodb+srv://...
+MONGO_DB=makima_bot
+OWNER_ID=
+GROQ_MODEL=llama-3.3-70b-versatile
+```
+
+### Docker (local or any VPS)
+```bash
+docker build -t makima-bot .
+docker run -d --env-file .env --name makima makima-bot
+```
+
+### Railway / Render / Koyeb
+1. Connect your GitHub repo
+2. Set the environment variables above
+3. The included `Dockerfile` will be detected automatically
+4. Deploy
+
+If the platform asks for a start command, use:
+```
+python main.py
+```
+
+### Important
+- Use **MongoDB Atlas** (free tier works) – local MongoDB is not available on most PaaS.
+- Make sure the bot has privacy mode disabled in @BotFather if you want it to read all group messages for filters/antiflood.
