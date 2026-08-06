@@ -108,6 +108,8 @@ Made with ❤️ for elegant group control.
 ### Required Environment Variables
 ```
 BOT_TOKEN=
+API_ID=
+API_HASH=
 GROQ_API_KEY=
 MONGO_URI=mongodb+srv://...
 MONGO_DB=makima_bot
