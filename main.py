@@ -6,7 +6,8 @@ from database.mongodb import init_db
 from handlers.start import start, help_command, callback_handler
 from handlers.chatbot import ai_message_handler
 from handlers.modules import load_all_handlers
-from utils.telethon_client import start_telethon, stop_telethon
+from handlers.telethon_client import start_telethon, stop_telethon
+from handlers.health import start_health_server
 
 # Logging
 logging.basicConfig(
@@ -16,26 +17,34 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 async def post_init(application: Application):
     await init_db()
     logger.info("Database initialized")
 
-    # Start Telethon (api_id + api_hash) if configured
+    # Start Telethon only if configured (never blocks / never prompts)
     if API_ID and API_HASH:
         client = await start_telethon()
         if client:
             application.bot_data["telethon"] = client
-            logger.info("Telethon client ready (api_id + api_hash)")
+            logger.info("Telethon client ready")
+        else:
+            logger.warning("Telethon not available – running in pure Bot API mode")
     else:
         logger.warning("API_ID / API_HASH not set – running in pure Bot API mode")
+
 
 async def post_shutdown(application: Application):
     await stop_telethon()
 
+
 def main():
     if not BOT_TOKEN:
-        logger.error("BOT_TOKEN not set in .env")
+        logger.error("BOT_TOKEN not set in environment")
         sys.exit(1)
+
+    # Health endpoint for Koyeb / Railway / Render ($PORT)
+    start_health_server()
 
     app = (
         Application.builder()
@@ -57,7 +66,11 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_message_handler))
 
     logger.info("Makima bot is starting...")
-    app.run_polling(allowed_updates=["message", "callback_query", "chat_member", "my_chat_member"])
+    app.run_polling(
+        allowed_updates=["message", "callback_query", "chat_member", "my_chat_member"],
+        drop_pending_updates=True,
+    )
+
 
 if __name__ == "__main__":
     main()

@@ -1,33 +1,37 @@
-# Makima Bot - Production Dockerfile
+# Makima Bot - Production Dockerfile (Koyeb / Render / Docker)
 FROM python:3.12-slim
 
-# Prevent Python from writing .pyc files and enable unbuffered logs
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PORT=8080
 
 WORKDIR /app
 
-# System dependencies (minimal)
+# Minimal build tools (for some wheels)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies first (better layer caching)
+# Dependencies first (layer cache)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# App code
 COPY . .
 
-# Create non-root user for security
-RUN useradd -m -u 1000 botuser && chown -R botuser:botuser /app
+# Non-root user
+RUN useradd -m -u 1000 botuser \
+    && chown -R botuser:botuser /app \
+    && mkdir -p /app && chown botuser:botuser /app
 USER botuser
 
-# Healthcheck (optional - platforms may ignore)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
-    CMD python -c "import sys; sys.exit(0)"
+# Platform health checks hit $PORT
+EXPOSE 8080
 
-# Start the bot
+# Simple process healthcheck (platforms may use their own)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:%s/' % os.getenv('PORT','8080'), timeout=3)" || exit 1
+
 CMD ["python", "main.py"]

@@ -1,0 +1,40 @@
+name: makima-bot
+services:
+  - name: bot
+    type: web
+    ports:
+      - port: 8080
+        protocol: http
+    routes:
+      - path: /
+    instance_types:
+      - type: free
+    scaling:
+      min: 1
+      max: 1
+    health_checks:
+      - grace_period: 40
+        interval: 30
+        timeout: 5
+        path: /
+        port: 8080
+        protocol: http
+    env:
+      - key: PORT
+        value: "8080"
+      - key: BOT_TOKEN
+        value: ""
+      - key: MONGO_URI
+        value: ""
+      - key: GROQ_API_KEY
+        value: ""
+      - key: OWNER_ID
+        value: ""
+      - key: API_ID
+        value: ""
+      - key: API_HASH
+        value: ""
+      - key: MONGO_DB
+        value: makima_bot
+      - key: LOG_LEVEL
+        value: INFO

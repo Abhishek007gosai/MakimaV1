@@ -1,139 +1,128 @@
-# Makima – Telegram Group Management Bot
+# Makima Bot
 
-Anime-themed group & channel management bot with **Groq AI Chatbot** and **MongoDB**.
+Anime-themed Telegram group management bot with AI chatbot (Groq), notes, filters, warns, locks, and more.
 
-Inspired by the Makima character (Chainsaw Man). Elegant, powerful, modular.
+## Required environment variables
 
-## Features (matching the screenshots)
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `BOT_TOKEN` | Yes | From @BotFather |
+| `MONGO_URI` | Yes | MongoDB Atlas connection string |
+| `GROQ_API_KEY` | Yes | From https://console.groq.com |
+| `OWNER_ID` | Yes | Your Telegram user ID |
+| `API_ID` | No | my.telegram.org (enables Telethon) |
+| `API_HASH` | No | my.telegram.org |
+| `MONGO_DB` | No | Default: `makima_bot` |
+| `GROQ_MODEL` | No | Default: `llama-3.3-70b-versatile` |
+| `LOG_LEVEL` | No | Default: `INFO` |
+| `PORT` | No | Health check port (default `8080`) |
 
-### Page 1 Modules
-- Admin, Anime, Anti-Channel
-- Anti-Spam, Antiflood, Approval
-- Bans, Birthday, Blocklists
-- Broadcast, Chatbot (Groq AI), Connections
-- Disabling, Extras, Federations
-- Filters, Formatting, Fun
-- Greetings, Images, Import/Export
-- Info, Karma, Locks
+Use **MongoDB Atlas** (free tier works). Local MongoDB is not available on most PaaS.
 
-### Page 2 Modules
-- Logging, Memes, Misc
-- Night-Mode, Notes, NSFW
-- Pin, Purges, Rankings
-- Reports, Rules, SFW
-- Stats, Stickers, Topics
-- Upload, Warnings
+---
 
-## Tech Stack
-- Python 3.10+
-- python-telegram-bot 21.x
-- Groq API (llama-3.3-70b-versatile or any model)
-- MongoDB (Motor async driver)
-- Fully modular – each feature in its own file
+## Deploy on Koyeb
 
-## Quick Start
+1. Push this repo to GitHub.
+2. Koyeb → **Create App** → **GitHub** → select the repo.
+3. **Builder**: Dockerfile (auto-detected).
+4. **Instance type**: Free / Nano.
+5. **Service type**: Web Service (needed for health checks).
+6. **Port**: `8080` (or leave default – app reads `$PORT`).
+7. **Health check**: HTTP, path `/`, port `8080`.
+8. Add environment variables (see table above).
+9. Deploy.
 
-1. **Clone / Unzip**
-   ```bash
-   cd makima_bot
-   ```
+The bot starts polling Telegram and serves `GET /` → `ok` on `$PORT` so health checks pass.
 
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Configure**
-   ```bash
-   cp .env.example .env
-   nano .env
-   ```
-   Fill in:
-   - `BOT_TOKEN` → from @BotFather
-   - `GROQ_API_KEY` → from https://console.groq.com
-   - `MONGO_URI` → local or MongoDB Atlas
-   - `OWNER_ID` → your Telegram user ID (@userinfobot)
-
-4. **Run**
-   ```bash
-   python main.py
-   ```
-
-## AI Chatbot Usage
-- In **private chat**: just talk to the bot
-- In **groups**: mention the bot (`@YourBot`) or reply to its messages
-- Admins can control with `/ai` settings (extendable)
-
-## Project Structure
-```
-makima_bot/
-├── main.py                 # Entry point
-├── config.py
-├── requirements.txt
-├── .env.example
-├── database/
-│   └── mongodb.py
-├── handlers/
-│   ├── start.py            # /start + menus
-│   ├── chatbot.py          # Groq AI
-│   └── modules/            # All feature modules
-│       ├── admin.py
-│       ├── warnings.py
-│       ├── locks.py
-│       ├── filters.py
-│       ├── notes.py
-│       ├── greetings.py
-│       ├── antiflood.py
-│       ├── ... (one file per module)
-├── utils/
-│   ├── helpers.py
-│   └── keyboards.py
-└── README.md
-```
-
-## Adding New Modules
-1. Create `handlers/modules/yourmodule.py`
-2. Implement `get_handlers()` that returns a list of handlers
-3. Import & add to `handlers/modules/__init__.py`
-
-## Notes
-- Some advanced modules (Federations, full Broadcast, Night-Mode scheduler, NSFW detection, etc.) have basic structure and can be extended.
-- For production: use a process manager (systemd / pm2 / docker) and MongoDB Atlas.
-- Rate limits: Groq free tier has limits – upgrade if needed.
-
-Made with ❤️ for elegant group control.
-
-## Deployment (Docker / Railway / Render / VPS)
-
-### Required Environment Variables
-```
-BOT_TOKEN=
-API_ID=
-API_HASH=
-GROQ_API_KEY=
-MONGO_URI=mongodb+srv://...
-MONGO_DB=makima_bot
-OWNER_ID=
-GROQ_MODEL=llama-3.3-70b-versatile
-```
-
-### Docker (local or any VPS)
+### Koyeb CLI (optional)
 ```bash
+koyeb app init makima-bot --docker
+koyeb service create bot --app makima-bot --docker-image ... 
+```
+
+---
+
+## Deploy on Render
+
+### Option A – Blueprint (recommended)
+1. Push repo to GitHub.
+2. Render → **New** → **Blueprint**.
+3. Select the repo (uses `render.yaml`).
+4. Fill in the secret env vars when prompted.
+5. Deploy (runs as a **Background Worker**).
+
+### Option B – Manual Worker
+1. **New** → **Background Worker**.
+2. Connect repo.
+3. Build: `pip install -r requirements.txt`
+4. Start: `python main.py`
+5. Add env vars from the table.
+6. Deploy.
+
+### Option C – Web Service (if you want HTTP health)
+Same as worker, but type **Web Service**, start command `python main.py`.  
+Health check path: `/`
+
+---
+
+## Deploy with Docker (any VPS)
+
+```bash
+cp .env.example .env
+# edit .env
+
 docker build -t makima-bot .
-docker run -d --env-file .env --name makima makima-bot
+docker run -d --env-file .env -p 8080:8080 --name makima makima-bot
 ```
 
-### Railway / Render / Koyeb
-1. Connect your GitHub repo
-2. Set the environment variables above
-3. The included `Dockerfile` will be detected automatically
-4. Deploy
+---
 
-If the platform asks for a start command, use:
-```
+## Local run
+
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
+# edit .env
 python main.py
 ```
 
-### Important
-- Use **MongoDB Atlas** (free tier works) – local MongoDB is not available on most PaaS.
-- Make sure the bot has privacy mode disabled in @BotFather if you want it to read all group messages for filters/antiflood.
+---
+
+## Project structure
+
+```
+├── main.py
+├── config.py
+├── requirements.txt
+├── Dockerfile
+├── Procfile
+├── render.yaml
+├── koyeb.yaml
+├── database/
+│   └── mongodb.py
+└── handlers/
+    ├── start.py
+    ├── chatbot.py
+    ├── helpers.py
+    ├── keyboards.py
+    ├── telethon_client.py
+    ├── health.py
+    └── modules/
+    ├── start.py
+    ├── chatbot.py
+    ├── modules/          # feature modules
+    └── utils/
+        ├── helpers.py
+        ├── keyboards.py
+        ├── telethon_client.py
+        └── health.py
+```
+
+## Notes
+
+- Disable **privacy mode** in @BotFather if the bot must see all group messages (filters / antiflood).
+- Telethon starts with bot token when `API_ID` + `API_HASH` are set (no phone login).
+- First deploy may take 1–2 minutes while indexes are created on MongoDB.
