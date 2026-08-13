@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, ChatMemberHandler, filters
-from handlers.utils.helpers import is_admin
+from handlers.helpers import is_admin
 from database.mongodb import greetings, get_chat_settings, update_chat_settings
 
 async def set_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):

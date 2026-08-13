@@ -1,6 +1,6 @@
 from telegram import Update, ChatPermissions
 from telegram.ext import ContextTypes, CommandHandler
-from handlers.utils.helpers import is_admin, get_user_from_message, extract_user_and_reason
+from handlers.helpers import is_admin, get_user_from_message, extract_user_and_reason
 from database.mongodb import warnings, get_chat_settings, update_chat_settings
 from config import MAX_WARNINGS
 import time

@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
-from handlers.utils.helpers import is_admin, is_approved
+from handlers.helpers import is_admin, is_approved
 from database.mongodb import blacklist
 import re
 

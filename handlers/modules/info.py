@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-from handlers.utils.helpers import get_user_from_message
+from handlers.helpers import get_user_from_message
 
 async def user_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await get_user_from_message(update, context) or update.effective_user

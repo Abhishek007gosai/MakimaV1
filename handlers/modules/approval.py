@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-from handlers.utils.helpers import is_admin, get_user_from_message
+from handlers.helpers import is_admin, get_user_from_message
 from database.mongodb import approvals
 
 async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE):

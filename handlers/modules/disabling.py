@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-from handlers.utils.helpers import is_admin
+from handlers.helpers import is_admin
 from database.mongodb import disabled_commands
 
 async def disable_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):

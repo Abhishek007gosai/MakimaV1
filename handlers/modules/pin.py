@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-from handlers.utils.helpers import is_admin
+from handlers.helpers import is_admin
 
 async def pin_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_admin(update, context):
