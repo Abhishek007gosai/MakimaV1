@@ -1,6 +1,6 @@
 from telegram import Update, InputMediaPhoto
 from telegram.ext import ContextTypes
-from utils.keyboards import main_menu, modules_keyboard, category_keyboard, back_button
+from handlers.keyboards import main_menu, modules_keyboard, category_keyboard, back_button
 from database.mongodb import users, chats
 import logging
 
