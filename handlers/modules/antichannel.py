@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
-from utils.helpers import is_admin
+from handlers.utils.helpers import is_admin
 from database.mongodb import get_chat_settings, update_chat_settings
 
 async def antichannel_toggle(update: Update, context: ContextTypes.DEFAULT_TYPE):

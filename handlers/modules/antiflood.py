@@ -1,6 +1,6 @@
 from telegram import Update, ChatPermissions
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
-from utils.helpers import is_admin, is_approved
+from handlers.utils.helpers import is_admin, is_approved
 from database.mongodb import get_chat_settings, update_chat_settings
 from collections import defaultdict
 import time

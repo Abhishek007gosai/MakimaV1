@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
 from database.mongodb import karma
-from utils.helpers import get_user_from_message
+from handlers.utils.helpers import get_user_from_message
 
 async def karma_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Detect +1 or -1 on reply"""

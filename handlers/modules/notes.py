@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-from utils.helpers import is_admin
+from handlers.utils.helpers import is_admin
 from database.mongodb import notes
 
 async def save_note(update: Update, context: ContextTypes.DEFAULT_TYPE):

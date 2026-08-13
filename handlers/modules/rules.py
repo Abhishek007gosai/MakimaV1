@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-from utils.helpers import is_admin
+from handlers.utils.helpers import is_admin
 from database.mongodb import rules_col
 
 async def set_rules(update: Update, context: ContextTypes.DEFAULT_TYPE):

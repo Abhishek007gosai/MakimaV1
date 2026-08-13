@@ -1,6 +1,6 @@
 from telegram import Update, ChatPermissions
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
-from utils.helpers import is_admin
+from handlers.utils.helpers import is_admin
 from database.mongodb import locks
 import logging
 
