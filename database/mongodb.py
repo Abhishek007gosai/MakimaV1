@@ -26,24 +26,46 @@ greetings = db.greetings
 rules_col = db.rules
 stats = db.stats
 
-async def init_db():
-    """Create indexes for better performance"""
+
+async def _safe_create_index(collection, keys, **kwargs):
+    """Create an index, logging but not raising on failure."""
     try:
-        await users.create_index("user_id", unique=True)
-        await chats.create_index("chat_id", unique=True)
-        await warnings.create_index([("chat_id", 1), ("user_id", 1)])
-        await notes.create_index([("chat_id", 1), ("name", 1)])
-        await filters_col.create_index([("chat_id", 1), ("keyword", 1)])
-        await blacklist.create_index([("chat_id", 1), ("word", 1)])
-        await chat_history.create_index([("chat_id", 1), ("timestamp", -1)])
-        await karma.create_index([("chat_id", 1), ("user_id", 1)])
-        await locks.create_index("chat_id", unique=True)
-        await disabled_commands.create_index([("chat_id", 1), ("command", 1)])
-        await greetings.create_index("chat_id", unique=True)
-        await rules_col.create_index("chat_id", unique=True)
+        await collection.create_index(keys, **kwargs)
+    except Exception as e:
+        # Index already exists or conflict with existing data – non-fatal
+        logger.warning(f"Index on {collection.name} {keys}: {e}")
+
+
+async def init_db():
+    """Create indexes for better performance. Cleans null keys that block unique indexes."""
+    try:
+        # Remove documents with null/missing user_id that block the unique index
+        result = await users.delete_many({"$or": [{"user_id": None}, {"user_id": {"$exists": False}}]})
+        if result.deleted_count:
+            logger.info(f"Cleaned {result.deleted_count} users documents with null user_id")
+
+        result = await chats.delete_many({"$or": [{"chat_id": None}, {"chat_id": {"$exists": False}}]})
+        if result.deleted_count:
+            logger.info(f"Cleaned {result.deleted_count} chats documents with null chat_id")
+
+        # Create indexes one-by-one so a single failure doesn't skip the rest
+        await _safe_create_index(users, "user_id", unique=True)
+        await _safe_create_index(chats, "chat_id", unique=True)
+        await _safe_create_index(warnings, [("chat_id", 1), ("user_id", 1)])
+        await _safe_create_index(notes, [("chat_id", 1), ("name", 1)])
+        await _safe_create_index(filters_col, [("chat_id", 1), ("keyword", 1)])
+        await _safe_create_index(blacklist, [("chat_id", 1), ("word", 1)])
+        await _safe_create_index(chat_history, [("chat_id", 1), ("timestamp", -1)])
+        await _safe_create_index(karma, [("chat_id", 1), ("user_id", 1)])
+        await _safe_create_index(locks, "chat_id", unique=True)
+        await _safe_create_index(disabled_commands, [("chat_id", 1), ("command", 1)])
+        await _safe_create_index(greetings, "chat_id", unique=True)
+        await _safe_create_index(rules_col, "chat_id", unique=True)
+
         logger.info("MongoDB indexes created successfully")
     except Exception as e:
         logger.error(f"Error creating indexes: {e}")
+
 
 async def get_chat_settings(chat_id: int) -> dict:
     doc = await settings.find_one({"chat_id": chat_id})
@@ -63,6 +85,7 @@ async def get_chat_settings(chat_id: int) -> dict:
         await settings.insert_one(default)
         return default
     return doc
+
 
 async def update_chat_settings(chat_id: int, data: dict):
     await settings.update_one(
