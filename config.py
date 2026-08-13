@@ -3,13 +3,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BOT_TOKEN = os.getenv("")
-API_ID = int(os.getenv("API_ID", ""))
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+API_ID = int(os.getenv("API_ID", "0"))
 API_HASH = os.getenv("API_HASH", "")
-GROQ_API_KEY = os.getenv("")
-MONGO_URI = os.getenv("MONGO_URI", "")
-MONGO_DB = os.getenv("MONGO_DB", "")
-OWNER_ID = int(os.getenv("OWNER_ID", ""))
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+MONGO_DB = os.getenv("MONGO_DB", "makima_bot")
+OWNER_ID = int(os.getenv("OWNER_ID", "0"))
 
 # Groq settings
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
